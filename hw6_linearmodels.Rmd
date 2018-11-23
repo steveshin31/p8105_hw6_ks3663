@@ -1,0 +1,24 @@
+---
+title: "hw6_Linear Models"
+author: "Kee-Young Shin"
+date: "November 23, 2018"
+output: github_document
+---
+
+```{r}
+library(tidyverse)
+library(RCurl)
+
+```
+
+## Problem 1
+```{r}
+# import data
+homicide_df = read.csv(text = 
+    getURL("https://raw.githubusercontent.com/washingtonpost/data-homicides/master/homicide-data.csv"), skip=7, header=T)
+```
+
+```{r}
+
+```
+
