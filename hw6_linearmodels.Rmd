@@ -8,6 +8,7 @@ output: github_document
 ```{r}
 library(tidyverse)
 library(RCurl)
+library(modelr)
 ```
 
 ## Problem 1
@@ -107,7 +108,15 @@ birthweight_df
 first_linear_model = lm(bwt ~ babysex + bhead + blength + malform + smoken, 
                         data = birthweight_df)
 ```
+Describe model building process
 
+```{r}
+# plot residuals for fitted values
+birthweight_df %>% 
+  add_predictions(first_linear_model) %>% 
+  add_residuals(first_linear_model) %>% 
+  ggplot(aes(x = pred, y = resid)) + geom_point()
+```
 
 
 Questions

@@ -31,6 +31,10 @@ library(RCurl)
     ## 
     ##     complete
 
+``` r
+library(modelr)
+```
+
 Problem 1
 ---------
 
@@ -13163,5 +13167,17 @@ birthweight_df
 first_linear_model = lm(bwt ~ babysex + bhead + blength + malform + smoken, 
                         data = birthweight_df)
 ```
+
+Describe model building process
+
+``` r
+# plot residuals for fitted values
+birthweight_df %>% 
+  add_predictions(first_linear_model) %>% 
+  add_residuals(first_linear_model) %>% 
+  ggplot(aes(x = pred, y = resid)) + geom_point()
+```
+
+![](hw6_linearmodels_files/figure-markdown_github/unnamed-chunk-9-1.png)
 
 Questions 1. when to convert numeric to factor
