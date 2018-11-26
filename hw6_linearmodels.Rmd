@@ -34,6 +34,81 @@ homicide_df = homicide_df %>%
 ```
 
 ```{r}
+# create function for regression
+glm_function = function(x) {
+  
+  output = glm(binary_solved ~ victim_age + victim_sex + victim_race, data = x,
+               family = binomial())
+  
+  broom::tidy(output) %>% 
+    mutate(OR = exp(estimate))
+}
+
+homicide_df %>% 
+  filter(city_state == "Baltimore, MD") %>% 
+  glm_function()
+```
+
+
+```{r}
+# fit regression for Baltimore, MD
+baltimore_regression = homicide_df %>% 
+  filter(city_state == "Baltimore, MD") %>% 
+  glm(binary_solved ~ victim_age + victim_sex + victim_race, data = ., 
+      family = binomial()) 
+
+confint(baltimore_regression)
+
+baltimore_regression %>% 
+  broom::tidy() %>% 
+  mutate(OR = exp(estimate)) %>% 
+  cbind(., confint(baltimore_regression)) %>% 
+  select(-(term))
+```
+
+```{r eval=FALSE, include=FALSE}
+prop_test_output = homicide_df_summarized %>% 
+  group_by(city_state) %>% 
+  nest() %>% 
+  mutate(output = map2(.x = homicide_df_summarized %>% pull(unsolved_homicide), 
+              .y = homicide_df_summarized %>% pull(total_homicide), 
+              ~prop.test(x = .x, n = .y)),
+         output = map(output, broom::tidy)) %>% 
+  select(-data) %>% 
+  unnest() %>% 
+  select
+
+# run regression on all cities 
+glm_output = homicide_df %>% 
+  group_by(city_state) %>% 
+  nest() %>% 
+  mutate(output = map(data, glm(binary_solved ~ victim_age + victim_sex + victim_race, data = data, 
+      family = binomial()))) %>% 
+  select(-data) %>% 
+  unnest()
+
+glm_output
+
+homicide_df %>% 
+  filter(binary_solved == 1)
+
 
 ```
 
+## Problem 2
+```{r}
+# load and clean data 
+birthweight_df = read.csv("./birthweight.csv") %>% 
+  janitor::clean_names() 
+birthweight_df
+```
+```{r}
+# propose regression model
+first_linear_model = lm(bwt ~ babysex + bhead + blength + malform + smoken, 
+                        data = birthweight_df)
+```
+
+
+
+Questions
+1. when to convert numeric to factor
