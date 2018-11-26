@@ -117,6 +117,16 @@ birthweight_df %>%
   add_residuals(first_linear_model) %>% 
   ggplot(aes(x = pred, y = resid)) + geom_point()
 ```
+```{r}
+# second model
+second_linear_model = lm(bwt ~ blength + gaweeks, data = birthweight_df)
+
+# third model 
+third_linear_model = lm(bwt ~ bhead + blength + babysex + bhead * blength + 
+                          bhead * babysex + blength * babysex + 
+                          bhead * blength * babysex, data = birthweight_df)
+
+```
 
 
 Questions

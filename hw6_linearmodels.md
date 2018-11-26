@@ -13180,4 +13180,14 @@ birthweight_df %>%
 
 ![](hw6_linearmodels_files/figure-markdown_github/unnamed-chunk-9-1.png)
 
+``` r
+# second model
+second_linear_model = lm(bwt ~ blength + gaweeks, data = birthweight_df)
+
+# third model 
+third_linear_model = lm(bwt ~ bhead + blength + babysex + bhead * blength + 
+                          bhead * babysex + blength * babysex + 
+                          bhead * blength * babysex, data = birthweight_df)
+```
+
 Questions 1. when to convert numeric to factor
