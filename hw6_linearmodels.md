@@ -13190,4 +13190,21 @@ third_linear_model = lm(bwt ~ bhead + blength + babysex + bhead * blength +
                           bhead * blength * babysex, data = birthweight_df)
 ```
 
+``` r
+# cross validation
+cv_df = 
+  crossv_mc(birthweight_df, 100) %>% 
+  mutate(train = map(train, as_tibble),
+         test = map(test, as_tibble)) %>% 
+  mutate(first_model = map(train, ~lm(bwt ~ babysex + bhead + blength + malform +  
+                                      smoken, data = .x)),
+         second_model = map(train, ~lm(bwt ~ blength + gaweeks, data = .x)),
+         third_model = map(train, ~lm(bwt ~ bhead + blength + babysex + bhead * 
+                                      blength + bhead * babysex + blength * babysex + 
+                                      bhead * blength * babysex, data = .x))) %>% 
+  mutate(rmse_first = map2_dbl(first_model, test, ~rmse(model = .x, data = .y)),
+         rmse_second = map2_dbl(second_model, test, ~rmse(model = .x, data = .y)),
+         rmse_third = map2_dbl(third_model, test, ~rmse(model = .x, data = .y)))
+```
+
 Questions 1. when to convert numeric to factor
