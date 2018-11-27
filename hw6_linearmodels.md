@@ -13207,4 +13207,16 @@ cv_df =
          rmse_third = map2_dbl(third_model, test, ~rmse(model = .x, data = .y)))
 ```
 
+``` r
+# compare models
+cv_df %>% 
+  select(starts_with("rmse")) %>% 
+  gather(key = model, value = rmse) %>% 
+  mutate(model = str_replace(model, "rmse_", ""),
+         model = fct_inorder(model)) %>% 
+  ggplot(aes(x = model, y = rmse)) + geom_violin()
+```
+
+![](hw6_linearmodels_files/figure-markdown_github/unnamed-chunk-12-1.png)
+
 Questions 1. when to convert numeric to factor
