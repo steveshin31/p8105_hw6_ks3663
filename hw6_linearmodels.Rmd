@@ -33,8 +33,6 @@ homicide_df = homicide_df %>%
   filter(!(city_state == "Tulsa, AL")) %>% 
   filter(!(victim_sex == "Unknown"))
   
-  
-
 ```
 
 
@@ -102,17 +100,21 @@ birthweight_df = read.csv("./birthweight.csv") %>%
 birthweight_df
 ```
 ```{r}
+library(leaps)
+
 # propose regression model
-first_linear_model = lm(bwt ~ babysex + bhead + blength + malform + smoken, 
-                        data = birthweight_df)
+full_model = lm(bwt ~ ., data = birthweight_df)
+step_model = step(full_model, direction = "both")
+step_model
 ```
-Describe model building process
+
+To select a model, a stepwise regression was performed. This stepwise selection process, which is a combination of forward and backward selections, returns a model that lowers the prediction error. The model reduced the full model containing 19 predictors, to a model containing 13 predictors. 
 
 ```{r}
 # plot residuals for fitted values
 birthweight_df %>% 
-  add_predictions(first_linear_model) %>% 
-  add_residuals(first_linear_model) %>% 
+  add_predictions(step_model) %>% 
+  add_residuals(step_model) %>% 
   ggplot(aes(x = pred, y = resid)) + geom_point()
 ```
 ```{r}
@@ -132,13 +134,14 @@ cv_df =
   crossv_mc(birthweight_df, 100) %>% 
   mutate(train = map(train, as_tibble),
          test = map(test, as_tibble)) %>% 
-  mutate(first_model = map(train, ~lm(bwt ~ babysex + bhead + blength + malform +  
-                                      smoken, data = .x)),
+  mutate(step_model = map(train, ~lm(bwt ~ babysex + bhead + blength + delwt + fincome
+                                     + gaweeks + menarche + mheight + momage + mrace +
+                                     parity + ppwt + smoken, data = .x)),
          second_model = map(train, ~lm(bwt ~ blength + gaweeks, data = .x)),
          third_model = map(train, ~lm(bwt ~ bhead + blength + babysex + bhead * 
                                       blength + bhead * babysex + blength * babysex + 
                                       bhead * blength * babysex, data = .x))) %>% 
-  mutate(rmse_first = map2_dbl(first_model, test, ~rmse(model = .x, data = .y)),
+  mutate(rmse_first = map2_dbl(step_model, test, ~rmse(model = .x, data = .y)),
          rmse_second = map2_dbl(second_model, test, ~rmse(model = .x, data = .y)),
          rmse_third = map2_dbl(third_model, test, ~rmse(model = .x, data = .y)))
   
