@@ -56,32 +56,8 @@ homicide_df = homicide_df %>%
   filter(!(city_state == "Phoenix, AZ")) %>% 
   filter(!(city_state == "Dallas, TX")) %>% 
   filter(!(city_state == "Kansas City, MO")) %>% 
-  filter(!(city_state == "Tulsa, AL"))
+  filter(!(city_state == "Tulsa, AL")) 
 ```
-
-``` r
-# create function for regression
-glm_function = function(x) {
-  
-  output = glm(binary_solved ~ victim_age + victim_sex + victim_race, data = x,
-               family = binomial())
-  
-  broom::tidy(output) %>% 
-    mutate(OR = exp(estimate))
-}
-
-homicide_df %>% 
-  filter(city_state == "Baltimore, MD") %>% 
-  glm_function()
-```
-
-    ## # A tibble: 4 x 6
-    ##   term                 estimate std.error statistic  p.value    OR
-    ##   <chr>                   <dbl>     <dbl>     <dbl>    <dbl> <dbl>
-    ## 1 (Intercept)           1.05      0.227        4.62 3.78e- 6 2.85 
-    ## 2 victim_age           -0.00374   0.00303     -1.23 2.17e- 1 0.996
-    ## 3 victim_sexMale       -0.885     0.136       -6.50 8.08e-11 0.413
-    ## 4 victim_racenon-white -0.793     0.174       -4.55 5.33e- 6 0.453
 
 ``` r
 # fit regression for Baltimore, MD
@@ -89,38 +65,59 @@ baltimore_regression = homicide_df %>%
   filter(city_state == "Baltimore, MD") %>% 
   glm(binary_solved ~ victim_age + victim_sex + victim_race, data = ., 
       family = binomial()) 
-
-confint(baltimore_regression)
 ```
 
-    ## Waiting for profiling to be done...
-
-    ##                             2.5 %       97.5 %
-    ## (Intercept)           0.607315568  1.496299124
-    ## victim_age           -0.009717968  0.002177355
-    ## victim_sexMale       -1.152586204 -0.618524492
-    ## victim_racenon-white -1.136727114 -0.452620698
-
 ``` r
+# show output with confidence intervals 
 baltimore_regression %>% 
   broom::tidy() %>% 
-  mutate(OR = exp(estimate)) %>% 
-  cbind(., confint(baltimore_regression)) %>% 
+  mutate(OR = exp(estimate),
+         conf_low = OR - 1.96 * std.error,
+         conf_high = OR + 1.96 * std.error) %>% 
   select(-(term))
 ```
 
-    ## Waiting for profiling to be done...
+    ## # A tibble: 4 x 7
+    ##   estimate std.error statistic  p.value    OR conf_low conf_high
+    ##      <dbl>     <dbl>     <dbl>    <dbl> <dbl>    <dbl>     <dbl>
+    ## 1  1.05      0.227        4.62 3.78e- 6 2.85     2.41      3.29 
+    ## 2 -0.00374   0.00303     -1.23 2.17e- 1 0.996    0.990     1.00 
+    ## 3 -0.885     0.136       -6.50 8.08e-11 0.413    0.146     0.680
+    ## 4 -0.793     0.174       -4.55 5.33e- 6 0.453    0.111     0.794
 
-    ##                          estimate   std.error statistic      p.value
-    ## (Intercept)           1.047360581 0.226554507  4.622996 3.782370e-06
-    ## victim_age           -0.003740252 0.003032787 -1.233272 2.174741e-01
-    ## victim_sexMale       -0.884534747 0.136100909 -6.499110 8.079669e-11
-    ## victim_racenon-white -0.792921985 0.174218341 -4.551312 5.331248e-06
-    ##                             OR        2.5 %       97.5 %
-    ## (Intercept)          2.8501185  0.607315568  1.496299124
-    ## victim_age           0.9962667 -0.009717968  0.002177355
-    ## victim_sexMale       0.4129062 -1.152586204 -0.618524492
-    ## victim_racenon-white 0.4525206 -1.136727114 -0.452620698
+``` r
+# run regression on all cities 
+glm_output = homicide_df %>% 
+  group_by(city_state) %>% 
+  nest() %>% 
+  mutate(output = map(data, ~glm(binary_solved ~ victim_age + victim_sex + 
+                                 victim_race, data = .x, family = binomial())), 
+         output = map(output, broom::tidy)) %>% 
+  select(-data) %>% 
+  unnest() %>% 
+  mutate(OR = exp(estimate),
+         conf_low = OR - 1.96 * std.error,
+         conf_high = OR + 1.96 * std.error) %>% 
+  select(city_state, term, OR, conf_low, conf_high)
+  
+  
+glm_output
+```
+
+    ## # A tibble: 219 x 5
+    ##    city_state      term                    OR conf_low conf_high
+    ##    <chr>           <chr>                <dbl>    <dbl>     <dbl>
+    ##  1 Albuquerque, NM (Intercept)          4.35     3.69      5.01 
+    ##  2 Albuquerque, NM victim_age           0.975    0.966     0.985
+    ##  3 Albuquerque, NM victim_sexMale       1.38     0.823     1.95 
+    ##  4 Albuquerque, NM victim_sexUnknown    2.34     1.51      3.16 
+    ##  5 Albuquerque, NM victim_racenon-white 0.686    0.190     1.18 
+    ##  6 Atlanta, GA     (Intercept)          2.89     2.20      3.57 
+    ##  7 Atlanta, GA     victim_age           0.990    0.982     0.998
+    ##  8 Atlanta, GA     victim_sexMale       0.973    0.598     1.35 
+    ##  9 Atlanta, GA     victim_racenon-white 0.767    0.212     1.32 
+    ## 10 Baltimore, MD   (Intercept)          2.85     2.41      3.29 
+    ## # ... with 209 more rows
 
 Problem 2
 ---------
@@ -13178,7 +13175,7 @@ birthweight_df %>%
   ggplot(aes(x = pred, y = resid)) + geom_point()
 ```
 
-![](hw6_linearmodels_files/figure-markdown_github/unnamed-chunk-9-1.png)
+![](hw6_linearmodels_files/figure-markdown_github/unnamed-chunk-10-1.png)
 
 ``` r
 # second model
@@ -13217,6 +13214,6 @@ cv_df %>%
   ggplot(aes(x = model, y = rmse)) + geom_violin()
 ```
 
-![](hw6_linearmodels_files/figure-markdown_github/unnamed-chunk-12-1.png)
+![](hw6_linearmodels_files/figure-markdown_github/unnamed-chunk-13-1.png)
 
-Questions 1. when to convert numeric to factor
+Questions 1. when to convert numeric to factor 2. what does it mean describe modeling process
