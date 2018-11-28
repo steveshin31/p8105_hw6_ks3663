@@ -51,7 +51,8 @@ baltimore_regression %>%
   mutate(OR = exp(estimate),
          conf_low = OR - 1.96 * std.error,
          conf_high = OR + 1.96 * std.error) %>% 
-  select(-(term))
+  filter(term == "victim_racenon-white") %>% 
+  select(term, OR, conf_low, conf_high)
 
 ```
 
@@ -70,7 +71,8 @@ glm_output = homicide_df %>%
   mutate(OR = exp(estimate),
          conf_low = OR - 1.96 * std.error,
          conf_high = OR + 1.96 * std.error) %>% 
-  select(city_state, term, OR, conf_low, conf_high)
+  select(city_state, term, OR, conf_low, conf_high) %>% 
+  filter(term == "victim_racenon-white")
   
   
 glm_output
@@ -78,7 +80,15 @@ glm_output
 
 ```
 ```{r}
-
+# create plot 
+glm_output %>% 
+  mutate(city_state = as.factor(city_state),
+         city_state = fct_reorder(city_state, OR)) %>% 
+  ggplot(aes(x = city_state, y = OR)) + 
+    geom_point() +
+    geom_errorbar(ymin = glm_output$conf_low, 
+                  ymax = glm_output$conf_high) +
+    theme(axis.text.x = element_text(angle = 80, hjust = 1))
 ```
 
 

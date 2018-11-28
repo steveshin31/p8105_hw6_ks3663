@@ -74,16 +74,14 @@ baltimore_regression %>%
   mutate(OR = exp(estimate),
          conf_low = OR - 1.96 * std.error,
          conf_high = OR + 1.96 * std.error) %>% 
-  select(-(term))
+  filter(term == "victim_racenon-white") %>% 
+  select(term, OR, conf_low, conf_high)
 ```
 
-    ## # A tibble: 4 x 7
-    ##   estimate std.error statistic  p.value    OR conf_low conf_high
-    ##      <dbl>     <dbl>     <dbl>    <dbl> <dbl>    <dbl>     <dbl>
-    ## 1  1.05      0.227        4.62 3.78e- 6 2.85     2.41      3.29 
-    ## 2 -0.00374   0.00303     -1.23 2.17e- 1 0.996    0.990     1.00 
-    ## 3 -0.885     0.136       -6.50 8.08e-11 0.413    0.146     0.680
-    ## 4 -0.793     0.174       -4.55 5.33e- 6 0.453    0.111     0.794
+    ## # A tibble: 1 x 4
+    ##   term                    OR conf_low conf_high
+    ##   <chr>                <dbl>    <dbl>     <dbl>
+    ## 1 victim_racenon-white 0.453    0.111     0.794
 
 ``` r
 # run regression on all cities 
@@ -98,26 +96,41 @@ glm_output = homicide_df %>%
   mutate(OR = exp(estimate),
          conf_low = OR - 1.96 * std.error,
          conf_high = OR + 1.96 * std.error) %>% 
-  select(city_state, term, OR, conf_low, conf_high)
+  select(city_state, term, OR, conf_low, conf_high) %>% 
+  filter(term == "victim_racenon-white")
   
   
 glm_output
 ```
 
-    ## # A tibble: 219 x 5
+    ## # A tibble: 47 x 5
     ##    city_state      term                    OR conf_low conf_high
     ##    <chr>           <chr>                <dbl>    <dbl>     <dbl>
-    ##  1 Albuquerque, NM (Intercept)          4.35     3.69      5.01 
-    ##  2 Albuquerque, NM victim_age           0.975    0.966     0.985
-    ##  3 Albuquerque, NM victim_sexMale       1.38     0.823     1.95 
-    ##  4 Albuquerque, NM victim_sexUnknown    2.34     1.51      3.16 
-    ##  5 Albuquerque, NM victim_racenon-white 0.686    0.190     1.18 
-    ##  6 Atlanta, GA     (Intercept)          2.89     2.20      3.57 
-    ##  7 Atlanta, GA     victim_age           0.990    0.982     0.998
-    ##  8 Atlanta, GA     victim_sexMale       0.973    0.598     1.35 
-    ##  9 Atlanta, GA     victim_racenon-white 0.767    0.212     1.32 
-    ## 10 Baltimore, MD   (Intercept)          2.85     2.41      3.29 
-    ## # ... with 209 more rows
+    ##  1 Albuquerque, NM victim_racenon-white 0.686   0.190      1.18 
+    ##  2 Atlanta, GA     victim_racenon-white 0.767   0.212      1.32 
+    ##  3 Baltimore, MD   victim_racenon-white 0.453   0.111      0.794
+    ##  4 Baton Rouge, LA victim_racenon-white 0.656  -0.102      1.41 
+    ##  5 Birmingham, AL  victim_racenon-white 1.05    0.527      1.57 
+    ##  6 Boston, MA      victim_racenon-white 0.121  -0.767      1.01 
+    ##  7 Buffalo, NY     victim_racenon-white 0.447  -0.153      1.05 
+    ##  8 Charlotte, NC   victim_racenon-white 0.555   0.0200     1.09 
+    ##  9 Chicago, IL     victim_racenon-white 0.575   0.310      0.840
+    ## 10 Cincinnati, OH  victim_racenon-white 0.327  -0.217      0.871
+    ## # ... with 37 more rows
+
+``` r
+# create plot 
+glm_output %>% 
+  mutate(city_state = as.factor(city_state),
+         city_state = fct_reorder(city_state, OR)) %>% 
+  ggplot(aes(x = city_state, y = OR)) + 
+    geom_point() +
+    geom_errorbar(ymin = glm_output$conf_low, 
+                  ymax = glm_output$conf_high) +
+    theme(axis.text.x = element_text(angle = 80, hjust = 1))
+```
+
+![](hw6_linearmodels_files/figure-markdown_github/unnamed-chunk-7-1.png)
 
 Problem 2
 ---------
