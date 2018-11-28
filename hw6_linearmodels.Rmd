@@ -30,9 +30,11 @@ homicide_df = homicide_df %>%
   filter(!(city_state == "Phoenix, AZ")) %>% 
   filter(!(city_state == "Dallas, TX")) %>% 
   filter(!(city_state == "Kansas City, MO")) %>% 
-  filter(!(city_state == "Tulsa, AL")) 
+  filter(!(city_state == "Tulsa, AL")) %>% 
+  filter(!(victim_sex == "Unknown"))
   
   
+
 ```
 
 

@@ -56,7 +56,8 @@ homicide_df = homicide_df %>%
   filter(!(city_state == "Phoenix, AZ")) %>% 
   filter(!(city_state == "Dallas, TX")) %>% 
   filter(!(city_state == "Kansas City, MO")) %>% 
-  filter(!(city_state == "Tulsa, AL")) 
+  filter(!(city_state == "Tulsa, AL")) %>% 
+  filter(!(victim_sex == "Unknown"))
 ```
 
 ``` r
@@ -106,12 +107,12 @@ glm_output
     ## # A tibble: 47 x 5
     ##    city_state      term                    OR conf_low conf_high
     ##    <chr>           <chr>                <dbl>    <dbl>     <dbl>
-    ##  1 Albuquerque, NM victim_racenon-white 0.686   0.190      1.18 
+    ##  1 Albuquerque, NM victim_racenon-white 0.716   0.229      1.20 
     ##  2 Atlanta, GA     victim_racenon-white 0.767   0.212      1.32 
     ##  3 Baltimore, MD   victim_racenon-white 0.453   0.111      0.794
     ##  4 Baton Rouge, LA victim_racenon-white 0.656  -0.102      1.41 
     ##  5 Birmingham, AL  victim_racenon-white 1.05    0.527      1.57 
-    ##  6 Boston, MA      victim_racenon-white 0.121  -0.767      1.01 
+    ##  6 Boston, MA      victim_racenon-white 0.134  -0.750      1.02 
     ##  7 Buffalo, NY     victim_racenon-white 0.447  -0.153      1.05 
     ##  8 Charlotte, NC   victim_racenon-white 0.555   0.0200     1.09 
     ##  9 Chicago, IL     victim_racenon-white 0.575   0.310      0.840
