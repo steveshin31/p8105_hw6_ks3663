@@ -27,7 +27,7 @@ homicide_df = homicide_df %>%
          victim_age = as.numeric(victim_age),
          victim_race = as.factor(ifelse(victim_race == "White", "white", "non-white")),
          victim_race = relevel(victim_race, ref = "white")) %>% 
-  filter(!(city_state == "Phoenix, AZ")) %>% 
+  filter(!((city_state == "Phoenix, AZ"))) %>% 
   filter(!(city_state == "Dallas, TX")) %>% 
   filter(!(city_state == "Kansas City, MO")) %>% 
   filter(!(city_state == "Tulsa, AL")) %>% 
@@ -44,6 +44,7 @@ baltimore_regression = homicide_df %>%
       family = binomial()) 
 
 ```
+
 ```{r}
 # show output with confidence intervals 
 baltimore_regression %>% 
@@ -91,13 +92,13 @@ glm_output %>%
     theme(axis.text.x = element_text(angle = 80, hjust = 1))
 ```
 
+The odds ratio for Boston, MA is the lowest while highest for Tampa, FL. In other words, the odds of solving homicide for a non-white is much higher than for whites in Tampa, FL, keeping all other variables fixed. The confidence intervals are wide around the estimates due to high standard errors. 
 
 ## Problem 2
 ```{r}
 # load and clean data 
 birthweight_df = read.csv("./birthweight.csv") %>% 
   janitor::clean_names() 
-birthweight_df
 ```
 ```{r}
 library(leaps)
@@ -158,8 +159,4 @@ cv_df %>%
 
 ```
 
-
-Questions
-1. when to convert numeric to factor
-2. what does it mean describe modeling process 
-
+Looking at the rmse plot, we can see that the second model is clearly the least effective in predicting the outcome. the step model and the third model (the one containing the interactions) are quite evenly matched. I would suggest picking the third model since since there are more ways to interpret its results. 
